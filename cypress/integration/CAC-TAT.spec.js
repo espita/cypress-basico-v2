@@ -41,7 +41,7 @@ describe('Central de Atendimento ao Cliente TAT', function () {
         cy.get('#firstName').type('Edson')
         cy.get('#lastName').type('Pita')
         cy.get('#email').type('pita.test@est.com')
-        cy.get('#phone-checkbox').click()
+        cy.get('#phone-checkbox').check()
         cy.get('#open-text-area').type('testando')
         cy.contains('button', 'Enviar').click()
         cy.get('.error').should('be.visible')
@@ -103,13 +103,58 @@ describe('Central de Atendimento ao Cliente TAT', function () {
         cy.get('input[type="radio"][value="feedback"]')
             .check()
             .should('have.value', 'feedback')
-    });
+    })
 
     it('marca cada tipo de atendimento', () => {
         cy.get('input[type="radio"]')
             .each(function ($radio) {
                 cy.wrap($radio).check()
                 cy.wrap($radio).should('be.checked')
+            })
+    })
+    it('marca ambos checkboxes, depois desmarca o último', () => {
+        cy.get('input[type="checkbox"]')
+            .check()
+            .should('be.checked')
+            .last()
+            .uncheck()
+            .should('not.be.checked')
+    })
+    it('seleciona um arquivo da pasta fixtures', () => {
+        cy.get('#file-upload')
+            .selectFile('cypress/fixtures/example.json')
+            .then(input => {
+                expect(input[0].files[0].name).to.equal('example.json')
+            })
+    })
+    it('seleciona um arquivo simulando um drag-and-drop', () => {
+        cy.get('#file-upload')
+            .selectFile('cypress/fixtures/example.json', {
+                action: 'drag-drop'
+            })
+            .then(input => {
+                expect(input[0].files[0].name).to.equal('example.json')
+            })
+
+    })
+    it('seleciona um arquivo utilizando uma fixture para a qual foi dada um alias', () => {
+        cy.fixture('example.json').as('testFile')
+        cy.get('#file-upload')
+            .selectFile('@testFile')
+            .then(input => {
+                expect(input[0].files[0].name).to.equal('example.json')
+            })
+
+    })
+    it('seleciona multiplos arquivos da pasta fixtures', () => {
+        cy.get('#file-upload')
+            .selectFile([
+                'cypress/fixtures/example.json',
+                'cypress/fixtures/file.txt'
+            ])
+            .then(input => {
+                expect(input[0].files[0].name).to.equal('example.json')
+                expect(input[0].files[1].name).to.equal('file.txt')
             })
     });
 })
